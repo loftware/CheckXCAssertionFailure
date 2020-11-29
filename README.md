@@ -1,4 +1,4 @@
-# LoftTest_CheckXCAssertioniFailure
+# LoftTest_CheckXCAssertionFailure
 
 Test your testing code! Allows you to write an `XCTest` that checks that a given
 expression causes some `XCAssert` function call to fail.
