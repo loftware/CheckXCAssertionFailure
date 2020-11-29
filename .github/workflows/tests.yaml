@@ -85,9 +85,9 @@ jobs:
         - name: Swift Version
           run: swift --version
         - name: Build (Debug)
-          run: swift build -v -c debug
+          run: swift build -v -c debug --enable-test-discovery
         - name: Build (Release)
-          run: swift build -v -c release
+          run: swift build -v -c release --enable-test-discovery
         - name: Test (Debug)
           run: swift test -v --configuration debug --enable-test-discovery
         - name: Test (Release)
@@ -104,9 +104,9 @@ jobs:
         - name: Swift Version
           run: swift --version
         - name: Build (Debug)
-          run: swift build -v -c debug
+          run: swift build -v -c debug --enable-test-discovery
         - name: Build (Release)
-          run: swift build -v -c release
+          run: swift build -v -c release --enable-test-discovery
         - name: Test (Debug)
           run: swift test -v --configuration debug --enable-test-discovery
         - name: Test (Release)
@@ -122,9 +122,9 @@ jobs:
         - name: Swift Version
           run: swift --version
         - name: Build (Debug)
-          run: swift build -v -c debug
+          run: swift build -v -c debug --enable-test-discovery
         - name: Build (Release)
-          run: swift build -v -c release
+          run: swift build -v -c release --enable-test-discovery
         - name: Test (Debug)
           run: swift test -v --configuration debug --enable-test-discovery
         - name: Test (Release)
