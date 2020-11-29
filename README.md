@@ -1,10 +1,38 @@
-# LoftDataStructures_Bits
+# LoftTest_CheckXCAssertioniFailure
 
-`Bits` projects any underlying collection of unsigned integers as a collection
-of `Bool`, with each element of the `Bits` being true iff a corresponding bit in
-one of the underlying collection's elements is set. A `Bits` is indexed using
-`Int`s. Accessing the `n`th element of a `Bits` refers to the `n % wordSize`th
-bit of the `n / wordSize`th element of the `base` collection.
+Test your testing code! Allows you to write an `XCTest` that checks that a given
+expression causes some `XCAssert` function call to fail.
 
-The first bit of the collection corresponds to the highest order bit of the
-first element of the base collection.
+Say you have written:
+
+```swift
+import XCTest
+
+func XCTAssertIsPalindrome(
+  _ s: String, _ failureMessage: String = "Not a palindrome!",
+  file: StaticString = #filePath, line: UInt = #line
+) {
+  // Not the most efficient way to check for palindrome-ness!
+  XCTAssert(s.elementsEqual(s.reversed(), failureMessage, file: file, line: line)
+}
+```
+
+Then, derive your test case from `CheckXCAssertionFailureTestCase` and use
+`checkXCAssertionFailure` as shown to verify that your test function actually
+fails when it should:
+
+
+```swift
+import XCTest
+import LoftTest_CheckXCAssertionFailure
+
+final class MyXCTAssertionTests: CheckXCAssertionFailureTestCase {
+  func testXCTAsssertIsPalindrome() {
+    XCTAssertIsPalindrome("gohangasalamiimalasagnahog")
+  }
+  
+  func testXCTAsssertIsPalindromeFails() {
+    checkXCAssertionFailure(XCTAssertIsPalindrome("aploughmanpanama"))
+  }
+}
+```

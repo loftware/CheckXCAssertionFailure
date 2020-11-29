@@ -3,23 +3,23 @@ import PackageDescription
 
 let auxilliaryFiles = ["README.md", "LICENSE"]
 let package = Package(
-  name: "LoftTest_XCAssertTestCase",
+  name: "LoftTest_CheckXCAssertionFailure",
   products: [
     .library(
-      name: "LoftTest_XCAssertTestCase",
-      targets: ["LoftTest_XCAssertTestCase"]),
+      name: "LoftTest_CheckXCAssertionFailure",
+      targets: ["LoftTest_CheckXCAssertionFailure"]),
   ],
   targets: [
     .target(
-      name: "LoftTest_XCAssertTestCase",
+      name: "LoftTest_CheckXCAssertionFailure",
       path: ".",
       exclude: auxilliaryFiles + ["Tests.swift"],
-      sources: ["XCAssertTestCase.swift"]),
+      sources: ["CheckXCAssertionFailure.swift"]),
     .testTarget(
       name: "Test",
-      dependencies: ["LoftTest_XCAssertTestCase"],
+      dependencies: ["LoftTest_CheckXCAssertionFailure"],
       path: ".",
-      exclude: auxilliaryFiles + ["XCAssertTestCase.swift"],
+      exclude: auxilliaryFiles + ["CheckXCAssertionFailure.swift"],
       sources: ["Tests.swift"]
     ),
   ]
