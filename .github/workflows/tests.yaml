@@ -1,0 +1,21 @@
+name: test
+on:
+- [push, pull_request]
+jobs:
+  ubuntu:
+    container: 
+      image: swift:5.3
+    runs-on: 
+    - ubuntu-latest
+    - macOS-latest
+    steps:
+    - name: Swift version
+      run: swift --version
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Build
+      run: swift build -v
+    - name: Test
+      run: swift test --enable-test-discovery --sanitize=thread -v
+    - name: Build (opt)
+      run: swift build -v -c release
