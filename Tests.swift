@@ -1,6 +1,8 @@
 import XCTest
 import LoftTest_CheckXCAssertionFailure
 
+#if compiler(>=5.3)
+
 func myXCTAssertIsPalindrome(
   _ s: String, _ failureMessage: String = "Not a palindrome!",
   file: StaticString = #filePath, line: UInt = #line
@@ -8,6 +10,18 @@ func myXCTAssertIsPalindrome(
   // Not the most efficient way to check for palindrome-ness!
   XCTAssert( s.elementsEqual(s.reversed()), failureMessage, file: file, line: line)
 }
+
+#else
+
+func myXCTAssertIsPalindrome(
+  _ s: String, _ failureMessage: String = "Not a palindrome!",
+  file: StaticString = #file, line: UInt = #line
+) {
+  // Not the most efficient way to check for palindrome-ness!
+  XCTAssert( s.elementsEqual(s.reversed()), failureMessage, file: file, line: line)
+}
+
+#endif
 
 // Note: in order to truly prove that checkXCAssertionFailure works, you need to alter these tests
 // one by one, to force them to fail in different places.  Of course, that is the problem this
