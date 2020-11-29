@@ -30,8 +30,24 @@ open class CheckXCAssertionFailureTestCase: XCTestCase {
   
   /// When non-`nil`, the assertion failure currently being checked for.
   private var activeAssertionFailureCheck: AssertionFailureCheck?
+
+  #if os(macOS) // test the non-macOS code by replacing with #if false
   
-  /// Records a failure during test execution for the test run.
+    /// Records the occurrence of `issue` in the execution of the test.
+    open override func record(_ issue: XCTIssue) {
+    if issue.type == .assertionFailure, let activeCheck = activeAssertionFailureCheck {
+      let message = issue.compactDescription + (issue.detailedDescription ?? "")
+      if message.firstOccurrence(ofElements: activeCheck.messageExcerpt) != nil {
+        activeAssertionFailureCheck!.isSatisfied = true
+      }
+      return
+    }
+    super.record(issue)
+  }
+  
+  #else
+  
+  /// Records a failure during test execution.
   ///
   /// - Parameters:
   ///   - failureMessage: The description of the failure.
@@ -52,7 +68,9 @@ open class CheckXCAssertionFailureTestCase: XCTestCase {
     super.recordFailure(
       withDescription: failureMessage, inFile: file, atLine: line, expected: isAssertionFailure)
   }
-
+  
+  #endif
+  
   /// `XCTAssert`'s that `requiredToFailXCAssertion`, when evaluated, causes an `XCAssert` function to
   /// fail, with `requiredMessageExcerpt` as a substring of the failure message.
   ///
@@ -81,6 +99,7 @@ open class CheckXCAssertionFailureTestCase: XCTestCase {
   }
 }
 
+// TODO: factor into separate loft library.
 private extension Collection where Element: Equatable {
   /// Returns the first `SubSequence` of `self` with elements equal to `excerpt`.
   func firstOccurrence<E: Collection>(ofElements excerpt: E) -> SubSequence?
