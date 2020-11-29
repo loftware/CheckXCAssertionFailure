@@ -1,7 +1,7 @@
 import XCTest
 import LoftTest_CheckXCAssertionFailure
 
-func XCTAssertIsPalindrome(
+func myXCTAssertIsPalindrome(
   _ s: String, _ failureMessage: String = "Not a palindrome!",
   file: StaticString = #filePath, line: UInt = #line
 ) {
@@ -9,6 +9,9 @@ func XCTAssertIsPalindrome(
   XCTAssert( s.elementsEqual(s.reversed()), failureMessage, file: file, line: line)
 }
 
+// Note: in order to truly prove that checkXCAssertionFailure works, you need to alter these tests
+// one by one, to force them to fail in different places.  Of course, that is the problem this
+// package is intended to solve for other packages.
 final class CheckXCAssertionFailureTests: CheckXCAssertionFailureTestCase {
   func testNoAssertion() {
     XCTAssert(true)
@@ -44,9 +47,17 @@ final class CheckXCAssertionFailureTests: CheckXCAssertionFailureTestCase {
     XCTAssert(true)
   }
 
+  func testInterleaved() {
+    XCTAssert(true)
+    checkXCAssertionFailure(XCTAssert(false))
+    XCTAssert(true)
+    checkXCAssertionFailure(XCTAssert(false))
+    XCTAssert(true)
+  }
+
   func testXCTAsssertIsPalindrome() {
-    XCTAssertIsPalindrome("gohangasalamiimalasagnahog")
-    checkXCAssertionFailure(XCTAssertIsPalindrome("aploughmanpanama"))
+    myXCTAssertIsPalindrome("gohangasalamiimalasagnahog")
+    checkXCAssertionFailure(myXCTAssertIsPalindrome("aploughmanpanama"))
   }
 
   /* Not actually expected to work.

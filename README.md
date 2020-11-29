@@ -9,7 +9,7 @@ Say you have written:
 import XCTest
 
 /// `XCTAssert`'s that `s` is a palindrome, with the given failure message.
-func XCTAssertIsPalindrome(
+func myXCTAssertIsPalindrome(
   _ s: String, _ failureMessage: String = "Not a palindrome!",
   file: StaticString = #filePath, line: UInt = #line
 ) {
@@ -29,11 +29,11 @@ import LoftTest_CheckXCAssertionFailure
 
 final class MyXCTAssertionTests: CheckXCAssertionFailureTestCase {
   func testXCTAsssertIsPalindrome() {
-    XCTAssertIsPalindrome("gohangasalamiimalasagnahog")
+    myXCTAssertIsPalindrome("gohangasalamiimalasagnahog")
   }
   
   func testXCTAsssertIsPalindromeFails() {
-    checkXCAssertionFailure(XCTAssertIsPalindrome("aploughmanpanama"))
+    checkXCAssertionFailure(myXCTAssertIsPalindrome("aploughmanpanama"))
   }
 }
 ```

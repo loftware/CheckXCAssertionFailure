@@ -14,113 +14,69 @@
 
 import XCTest
 
-/// `XCTAssert`'s that `requiredToFailXCAssertion`, when evaluated, causes an `XCAssert` function to
-/// fail, with `requiredMessageExcerpt` as a substring of the failure message.
-///
-/// - Warning: must be used only from an `CheckXCAssertionFailureTestCase`.
-public func checkXCAssertionFailure<T>(
-  _ requiredToFailXCAssertion: @autoclosure () -> T,
-  _ requiredMessageExcerpt: String = "",
-  file: StaticString = #filePath, line: UInt = #line
-) {
-  // use the magic numbers defined below to shove information into the test case using XCTFail
-  XCTFail("\0", file: file, line: UInt(collectRequirements))
-  XCTFail(requiredMessageExcerpt, file: file, line: line)
-  
-  _ = requiredToFailXCAssertion() // try to do the thing that's expected to fail.
-  
-  XCTFail(file: file, line: UInt(stopRequiringXCAssertion))
-}
-
-/// A magic number that, when passed as a line number, tells the test case that the next failure
-/// actually transmits information about the expected XCAssertion.
-private let collectRequirements = Int.max
-
-/// A magic number that, when passed as a line number, tells the test case that it should revert to
-/// normal mode and allow regular tests to work.
-private let stopRequiringXCAssertion = Int.max - 1
-
-/// An XCTestCase subclass that supports the use of `checkXCAssertionFailure` in tests.
+/// A test case supports the use of `checkXCAssertionFailure` in tests.
 open class CheckXCAssertionFailureTestCase: XCTestCase {
-  /// The state of `self`.
-  ///
-  /// - See Also: `State`
-  private var state = State.normal
-  
-  /// The state machine representation of the test case.
-  private enum State {
-    /// Functioning like a normal `XCTestCase`.
-    case normal
-    
-    /// Waiting for a failure that transmits the required XCTAssert failure message, appended to a
-    /// “garbage” string having the given number of prefix characters.
-    case collectingRequirements(prefixUTF8Count: Int)
-    
-    /// Waiting for a failure with a message containing `messageExcerpt`; if not found we should
-    /// report a failure at the given `file` and `line`.
-    case requiringXCAssertionFailure(messageExcerpt: Substring, file: String, line: Int)
+  /// State of an active check for an `XCTAssert` failure
+  private struct AssertionFailureCheck {
+    /// A substring of the failure message of matching assertions.
+    let messageExcerpt: String
 
-    /// The assertion failure we were waiting for was found, but the expression that is being
-    /// checked for failure is still running.
-    case ignoringXCAssertionFailures
+    /// True iff the check is satisfied
+    var isSatisfied: Bool = false
+    
+    /// The file and line on which to report a failure if the check is not satisfied.
+    let sourceLocation: (file: StaticString, line: UInt)
   }
-
+  
+  /// When non-`nil`, the assertion failure currently being checked for.
+  private var activeAssertionFailureCheck: AssertionFailureCheck?
+  
   /// Records a failure during test execution for the test run.
   ///
   /// - Parameters:
   ///   - failureMessage: The description of the failure.
-  ///   - file: The file path to the source file where the failure occurred or nil if unknown.
-  ///   - line: The line number in the source file at filePath where the failure occurred.
-  ///   - isAssertionFailure: true if the failure was the result of a failed assertion, false if it
-  ///     was the result of an uncaught exception.
+  ///   - file: The path to the source file where the failure occurred or `nil` if unknown.
+  ///   - line: The line in the source file where the failure occurred.
+  ///   - isAssertionFailure: `true` if the failure was the result of a failed assertion, `false` if
+  ///     it was the result of an uncaught exception.
   open override func recordFailure(
     withDescription failureMessage: String, inFile file: String, atLine line: Int,
     expected isAssertionFailure: Bool
   ) {
-    if !isAssertionFailure {
-      super.recordFailure(
-        withDescription: failureMessage, inFile: file, atLine: line, expected: isAssertionFailure)
+    if isAssertionFailure, let activeCheck = activeAssertionFailureCheck {
+      if failureMessage.firstOccurrence(ofElements: activeCheck.messageExcerpt) != nil {
+        activeAssertionFailureCheck!.isSatisfied = true
+      }
       return
     }
-    
-    switch state {
-    case .normal:
-      assert(line != stopRequiringXCAssertion)
-      if line == collectRequirements {
-        state = .collectingRequirements(prefixUTF8Count: failureMessage.utf8.count - 1)
-      }
-      else {
-        super.recordFailure(
-          withDescription: failureMessage, inFile: file, atLine: line, expected: isAssertionFailure)
-      }
+    super.recordFailure(
+      withDescription: failureMessage, inFile: file, atLine: line, expected: isAssertionFailure)
+  }
 
-    case .collectingRequirements(let prefixUTF8Count):
-      assert(line != collectRequirements)
-      assert(line != stopRequiringXCAssertion)
-      let excerpt = Substring(failureMessage.utf8.dropFirst(prefixUTF8Count))
-      state = .requiringXCAssertionFailure(messageExcerpt: excerpt, file: file, line: line)
+  /// `XCTAssert`'s that `requiredToFailXCAssertion`, when evaluated, causes an `XCAssert` function to
+  /// fail, with `requiredMessageExcerpt` as a substring of the failure message.
+  ///
+  /// - Warning: must be used only from an `CheckXCAssertionFailureTestCase`.
+  public func checkXCAssertionFailure<T>(
+    _ requiredToFailXCAssertion: @autoclosure () -> T,
+    _ requiredMessageExcerpt: String = "",
+    file: StaticString = #filePath, line: UInt = #line
+  ) {
+    self.activeAssertionFailureCheck
+      = .init(messageExcerpt: requiredMessageExcerpt, sourceLocation: (file: file, line: line))
+  
+    _ = requiredToFailXCAssertion() // try to do the thing that's expected to fail.
+  
+    let c = activeAssertionFailureCheck!
+    activeAssertionFailureCheck = nil
+    
+    if !c.isSatisfied {
+      let aboutExcerpt = c.messageExcerpt.isEmpty ? ""
+        : " with message containing \(String(reflecting: c.messageExcerpt))"
       
-    case .requiringXCAssertionFailure(let messageExcerpt, let file_, let line_):
-      assert(line != collectRequirements)
-      if line == stopRequiringXCAssertion {
-        let aboutExcerpt = messageExcerpt.isEmpty ? ""
-          : " with message containing \(String(reflecting: messageExcerpt))"
-      
-        super.recordFailure(
-          withDescription: "Required assertion failure\(aboutExcerpt) not found",
-          inFile: file_, atLine: line_, expected: true)
-        state = .normal
-      }
-      else {
-        if failureMessage.firstOccurrence(ofElements: messageExcerpt) != nil {
-          state = .ignoringXCAssertionFailures
-        }
-      }
-      
-    case .ignoringXCAssertionFailures:
-      if line == stopRequiringXCAssertion {
-        state = .normal
-      }
+      XCTFail(
+        "Required assertion failure\(aboutExcerpt) not found",
+        file: c.sourceLocation.file, line: c.sourceLocation.line)
     }
   }
 }
