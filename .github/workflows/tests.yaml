@@ -5,9 +5,7 @@ jobs:
   ubuntu:
     container: 
       image: swift:5.3
-    runs-on: 
-    - ubuntu-latest
-    - macOS-latest
+    runs-on: [ubuntu-latest, macOS-latest]
     steps:
     - name: Swift version
       run: swift --version
