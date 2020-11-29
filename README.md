@@ -8,6 +8,7 @@ Say you have written:
 ```swift
 import XCTest
 
+/// `XCTAssert`'s that `s` is a palindrome, with the given failure message.
 func XCTAssertIsPalindrome(
   _ s: String, _ failureMessage: String = "Not a palindrome!",
   file: StaticString = #filePath, line: UInt = #line
