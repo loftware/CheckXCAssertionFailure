@@ -4,11 +4,6 @@ import PackageDescription
 let auxilliaryFiles = ["README.md", "LICENSE"]
 let package = Package(
   name: "LoftTest_CheckXCAssertionFailure",
-  products: [
-    .library(
-      name: "LoftTest_CheckXCAssertionFailure",
-      targets: ["LoftTest_CheckXCAssertionFailure"]),
-  ],
   targets: [
     .target(
       name: "LoftTest_CheckXCAssertionFailure",
