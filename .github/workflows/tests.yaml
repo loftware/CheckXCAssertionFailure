@@ -1,6 +1,9 @@
 name: test
 
-on: [push, pull_request]
+on:
+    push:
+      branches: [main]
+    pull_request:
 
 jobs:
 
@@ -22,7 +25,7 @@ jobs:
         - name: Build (Release)
           run: swift build -v -c release
         - name: Test (Debug)
-          run: swift test -v --configuration debug  --enable-test-discovery
+          run: swift test -v --configuration debug --enable-test-discovery
         - name: Test (Release)
           run: swift test -v --configuration release -Xswiftc -enable-testing
 
@@ -44,7 +47,7 @@ jobs:
         - name: Build (Release)
           run: swift build -v -c release
         - name: Test (Debug)
-          run: swift test -v --configuration debug  --enable-test-discovery
+          run: swift test -v --configuration debug --enable-test-discovery
         - name: Test (Release)
           run: swift test -v --configuration release -Xswiftc -enable-testing --enable-test-discovery
 
@@ -67,7 +70,7 @@ jobs:
         - name: Build (Release)
           run: swift build -v -c release
         - name: Test (Debug)
-          run: swift test -v --configuration debug  --enable-test-discovery
+          run: swift test -v --configuration debug --enable-test-discovery
         - name: Test (Release)
           run: swift test -v --configuration release -Xswiftc -enable-testing --enable-test-discovery
 
@@ -86,7 +89,7 @@ jobs:
         - name: Build (Release)
           run: swift build -v -c release
         - name: Test (Debug)
-          run: swift test -v --configuration debug  --enable-test-discovery
+          run: swift test -v --configuration debug --enable-test-discovery
         - name: Test (Release)
           run: swift test -v --configuration release -Xswiftc -enable-testing
 
@@ -105,7 +108,7 @@ jobs:
         - name: Build (Release)
           run: swift build -v -c release
         - name: Test (Debug)
-          run: swift test -v --configuration debug  --enable-test-discovery
+          run: swift test -v --configuration debug --enable-test-discovery
         - name: Test (Release)
           run: swift test -v --configuration release -Xswiftc -enable-testing --enable-test-discovery
 
@@ -123,6 +126,6 @@ jobs:
         - name: Build (Release)
           run: swift build -v -c release
         - name: Test (Debug)
-          run: swift test -v --configuration debug  --enable-test-discovery
+          run: swift test -v --configuration debug --enable-test-discovery
         - name: Test (Release)
           run: swift test -v --configuration release -Xswiftc -enable-testing --enable-test-discovery
