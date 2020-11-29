@@ -37,4 +37,4 @@ final class MyXCTAssertionTests: CheckXCAssertionFailureTestCase {
   }
 }
 ```
- 
+
