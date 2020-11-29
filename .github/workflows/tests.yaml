@@ -91,7 +91,7 @@ jobs:
         - name: Test (Debug)
           run: swift test -v --configuration debug --enable-test-discovery
         - name: Test (Release)
-          run: swift test -v --configuration release -Xswiftc -enable-testing
+          run: swift test -v --configuration release -Xswiftc -enable-testing --enable-test-discovery
 
 
     linux-swift-52:
