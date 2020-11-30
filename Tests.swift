@@ -37,7 +37,7 @@ final class CheckXCAssertionFailureTests: CheckXCAssertionFailureTestCase {
   }
 
   func testAssertionMessage() {
-    checkXCAssertionFailure(XCTAssert(false, "la la la bamba la"), "bamba")
+    checkXCAssertionFailure(XCTAssert(false, "la la la bamba la"), messageExcerpt: "bamba")
     XCTAssert(true)
   }
 
@@ -47,7 +47,7 @@ final class CheckXCAssertionFailureTests: CheckXCAssertionFailureTestCase {
         XCTAssert(false, "la la la bamba la")
         XCTAssert(false)
       }(),
-      "bamba")
+      messageExcerpt: "bamba")
     XCTAssert(true)
   }
   
@@ -57,7 +57,7 @@ final class CheckXCAssertionFailureTests: CheckXCAssertionFailureTestCase {
         XCTAssert(false)
         XCTAssert(false, "la la la bamba la")
       }(),
-      "bamba")
+      messageExcerpt: "bamba")
     XCTAssert(true)
   }
 
@@ -82,3 +82,7 @@ final class CheckXCAssertionFailureTests: CheckXCAssertionFailureTestCase {
   }
    */
 }
+
+// Local Variables:
+// fill-column: 100
+// End:

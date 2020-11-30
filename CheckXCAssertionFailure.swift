@@ -74,39 +74,38 @@ open class CheckXCAssertionFailureTestCase: XCTestCase {
 #endif
 
 #if compiler(>=5.3)
-  /// `XCTAssert`'s that `requiredToFailXCAssertion`, when evaluated, causes an `XCAssert` function
-  /// to fail, with `requiredMessageExcerpt` as a substring of the failure message.
+  /// `XCTAssert`'s that `trigger`, when evaluated, causes an `XCAssert` function to fail, with
+  /// `messageExcerpt` as a substring of the failure message.
   public func checkXCAssertionFailure<T>(
-    _ requiredToFailXCAssertion: @autoclosure () -> T,
-    _ requiredMessageExcerpt: String = "",
+    _ trigger: @autoclosure () -> T, messageExcerpt: String = "",
     file: StaticString = #filePath, line: UInt = #line
   ) {
-    checkFailure(requiredToFailXCAssertion, requiredMessageExcerpt, file: file, line: line)
+    checkFailure(trigger, messageExcerpt: messageExcerpt, file: file, line: line)
   }
 #else
-  /// `XCTAssert`'s that `requiredToFailXCAssertion`, when evaluated, causes an `XCAssert` function
-  /// to fail, with `requiredMessageExcerpt` as a substring of the failure message.
+  /// `XCTAssert`'s that `trigger`, when evaluated, causes an `XCAssert` function to fail, with
+  /// `messageExcerpt` as a substring of the failure message.
   public func checkXCAssertionFailure<T>(
-    _ requiredToFailXCAssertion: @autoclosure () -> T,
-    _ requiredMessageExcerpt: String = "",
+    _ trigger: @autoclosure () -> T,
+    messageExcerpt: String = "",
     file: StaticString = #file, line: UInt = #line
   ) {
-    checkFailure(requiredToFailXCAssertion, requiredMessageExcerpt, file: file, line: line)
+    checkFailure(trigger, messageExcerpt: messageExcerpt, file: file, line: line)
   }
 #endif
 
 
-  /// `XCTAssert`'s that `requiredToFailXCAssertion`, when evaluated, causes an `XCAssert` function
-  /// to fail, with `requiredMessageExcerpt` as a substring of the failure message.
+  /// `XCTAssert`'s that `trigger()`, when evaluated, causes an `XCAssert` function to fail, with
+  /// `messageExcerpt` as a substring of the failure message.
   private func checkFailure<T>(
-    _ requiredToFailXCAssertion: () -> T,
-    _ requiredMessageExcerpt: String = "",
+    _ trigger: () -> T,
+    messageExcerpt: String = "",
     file: StaticString = #file, line: UInt = #line
   ) {
-    self.activeAssertionFailureCheck
-      = .init(messageExcerpt: requiredMessageExcerpt, sourceLocation: (file: file, line: line))
+    self.activeAssertionFailureCheck = AssertionFailureCheck(
+      messageExcerpt: messageExcerpt, sourceLocation: (file: file, line: line))
   
-    _ = requiredToFailXCAssertion() // try to do the thing that's expected to fail.
+    _ = trigger() // try to do the thing that's expected to fail.
   
     let c = activeAssertionFailureCheck!
     activeAssertionFailureCheck = nil
@@ -142,3 +141,7 @@ private extension Collection where Element: Equatable {
   }
 }
 
+
+// Local Variables:
+// fill-column: 100
+// End:
