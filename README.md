@@ -3,7 +3,7 @@
 Test your testing code! Allows you to write an `XCTest` that checks that a given
 expression causes some `XCAssert` function call to fail.
 
-Say you have written:
+Say you have written this `XCAssert`-style check:
 
 ```swift
 import XCTest
@@ -18,9 +18,8 @@ func myXCTAssertIsPalindrome(
 }
 ```
 
-Then, derive your test case from `CheckXCAssertionFailureTestCase` and use
-`checkXCAssertionFailure` as shown to verify that your test function actually
-fails when it should:
+You can test it by deriving your test case from `CheckXCAssertionFailureTestCase` 
+and using `checkXCAssertionFailure` as shown below:
 
 
 ```swift
@@ -32,6 +31,8 @@ final class MyXCTAssertionTests: CheckXCAssertionFailureTestCase {
     myXCTAssertIsPalindrome("gohangasalamiimalasagnahog")
   }
   
+  // This test only passes if the myXCTAssertIsPalindrome call causes an
+  // XCAssertion failure.
   func testXCTAsssertIsPalindromeFails() {
     checkXCAssertionFailure(myXCTAssertIsPalindrome("<==== NOT A PALINDROME"))
   }
