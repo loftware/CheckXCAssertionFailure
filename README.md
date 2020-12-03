@@ -33,7 +33,7 @@ final class MyXCTAssertionTests: CheckXCAssertionFailureTestCase {
   }
   
   func testXCTAsssertIsPalindromeFails() {
-    checkXCAssertionFailure(myXCTAssertIsPalindrome("aploughmanpanama"))
+    checkXCAssertionFailure(myXCTAssertIsPalindrome("<==== NOT A PALINDROME"))
   }
 }
 ```
