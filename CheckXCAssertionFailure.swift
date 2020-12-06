@@ -30,25 +30,34 @@ open class CheckXCAssertionFailureTestCase: XCTestCase {
   
   /// When non-`nil`, the assertion failure currently being checked for.
   private var activeAssertionFailureCheck: AssertionFailureCheck?
+  
+  /// When looking for an assertion failure message, the failures that didn't match.
+  private var nonMatchingFailures: [(file: String, line: Int, message: String)] = []
 
 #if os(macOS) && compiler(>=5.3)
-    // recordFailure has been deprecated, so use record instead. Test the older code on mac by
-    // replacing with #if false.
+  // recordFailure has been deprecated, so use record instead. Test the older code on mac by
+  // replacing with #if false.
 
-    /// Records the occurrence of `issue` in the execution of the test.
-    open override func record(_ issue: XCTIssue) {
-    if issue.type == .assertionFailure, let activeCheck = activeAssertionFailureCheck {
-      let message = issue.compactDescription + (issue.detailedDescription ?? "")
-      if message.firstOccurrence(ofElements: activeCheck.messageExcerpt) != nil {
-        activeAssertionFailureCheck!.isSatisfied = true
-      }
-      return
-    }
-    super.record(issue)
-  }
-  
+  /// Records the occurrence of `issue` in the execution of the test.
+ open override func record(_ issue: XCTIssue) {
+   if let activeCheck = activeAssertionFailureCheck, issue.type == .assertionFailure {
+     if activeCheck.isSatisfied { return }
+     let failureMessage = issue.compactDescription + (issue.detailedDescription ?? "")
+     if failureMessage.firstOccurrence(ofElements: activeCheck.messageExcerpt) != nil {
+       activeAssertionFailureCheck!.isSatisfied = true
+     }
+     else {
+       let l = issue.sourceCodeContext.location
+       nonMatchingFailures.append((l?.fileURL.path ?? "", l?.lineNumber ?? 0, failureMessage))
+     }
+   }
+   else {
+     super.record(issue)
+   }
+ }
+
 #else
-  
+ 
   /// Records a failure during test execution.
   ///
   /// - Parameters:
@@ -61,14 +70,19 @@ open class CheckXCAssertionFailureTestCase: XCTestCase {
     withDescription failureMessage: String, inFile file: String, atLine line: Int,
     expected isAssertionFailure: Bool
   ) {
-    if isAssertionFailure, let activeCheck = activeAssertionFailureCheck {
+    if let activeCheck = activeAssertionFailureCheck, isAssertionFailure {
+      if activeCheck.isSatisfied { return }
       if failureMessage.firstOccurrence(ofElements: activeCheck.messageExcerpt) != nil {
         activeAssertionFailureCheck!.isSatisfied = true
       }
-      return
+      else {
+        nonMatchingFailures.append(file, line, failureMessage)
+      }
     }
-    super.recordFailure(
-      withDescription: failureMessage, inFile: file, atLine: line, expected: isAssertionFailure)
+    else {
+      super.recordFailure(
+        withDescription: failureMessage, inFile: file, atLine: line, expected: isAssertionFailure)
+    }
   }
   
 #endif
@@ -113,9 +127,14 @@ open class CheckXCAssertionFailureTestCase: XCTestCase {
     if !c.isSatisfied {
       let aboutExcerpt = c.messageExcerpt.isEmpty ? ""
         : " with message containing \(String(reflecting: c.messageExcerpt))"
+
+      let lines = ["Required assertion failure\(aboutExcerpt) not found"]
+        + nonMatchingFailures.lazy.map {
+          "\($0.file):\($0.line): note: failure  detected \(String(reflecting: $0.message)))"
+        }
       
       XCTFail(
-        "Required assertion failure\(aboutExcerpt) not found",
+        lines.joined(separator: "\n"),
         file: c.sourceLocation.file, line: c.sourceLocation.line)
     }
   }
