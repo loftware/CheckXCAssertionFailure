@@ -30,9 +30,18 @@ open class CheckXCAssertionFailureTestCase: XCTestCase {
   
   /// When non-`nil`, the assertion failure currently being checked for.
   private var activeAssertionFailureCheck: AssertionFailureCheck?
+
+  /// The location of a failure
+  private struct SourceLocation: Hashable {
+    /// The path to the file in which the failure occurred.
+    let file: String
+    /// The line number on which the failure occurred.
+    let line: Int
+  }
   
-  /// When looking for an assertion failure message, the failures that didn't match.
-  private var nonMatchingFailures: [(file: String, line: Int, message: String)] = []
+  /// When looking for an assertion failure message, the failures messages that didn't match, one
+  /// per source location of the failure.
+  private var nonMatchingFailures: [SourceLocation: String] = [:]
 
 #if os(macOS) && compiler(>=5.3)
   // recordFailure has been deprecated, so use record instead. Test the older code on mac by
@@ -48,7 +57,8 @@ open class CheckXCAssertionFailureTestCase: XCTestCase {
      }
      else {
        let l = issue.sourceCodeContext.location
-       nonMatchingFailures.append((l?.fileURL.path ?? "", l?.lineNumber ?? 0, failureMessage))
+       nonMatchingFailures[.init(file: l?.fileURL.path ?? "", line: l?.lineNumber ?? 0)]
+         = failureMessage
      }
    }
    else {
@@ -76,7 +86,7 @@ open class CheckXCAssertionFailureTestCase: XCTestCase {
         activeAssertionFailureCheck!.isSatisfied = true
       }
       else {
-        nonMatchingFailures.append(file, line, failureMessage)
+        nonMatchingFailures[.init(file: file, line:line)] = failureMessage
       }
     }
     else {
@@ -130,7 +140,7 @@ open class CheckXCAssertionFailureTestCase: XCTestCase {
 
       let lines = ["Required assertion failure\(aboutExcerpt) not found"]
         + nonMatchingFailures.lazy.map {
-          "\($0.file):\($0.line): note: failure  detected \(String(reflecting: $0.message)))"
+          "\($0.key.file):\($0.key.line): note: failure  detected \(String(reflecting: $0.value)))"
         }
       
       XCTFail(
