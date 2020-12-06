@@ -1,6 +1,6 @@
 # LoftTest_CheckXCAssertionFailure
 
-An XCTest-compatible components that can verify that a given test fails as
+XCTest-compatible components that can verify that a given test fails as
 expected.
 
 ## Basic Usage
