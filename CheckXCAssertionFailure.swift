@@ -124,7 +124,7 @@ open class CheckXCAssertionFailureTestCase: XCTestCase {
   private func checkFailure<T>(
     _ trigger: () -> T,
     messageExcerpt: String = "",
-    file: StaticString = #file, line: UInt = #line
+    file: StaticString, line: UInt
   ) {
     self.activeAssertionFailureCheck = AssertionFailureCheck(
       messageExcerpt: messageExcerpt, sourceLocation: (file: file, line: line))
